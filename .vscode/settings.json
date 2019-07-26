@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "qtcore": "cpp"
+    },
+    "editor.tabSize": 2
+}

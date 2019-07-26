@@ -1,0 +1,35 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build and run active file",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/build-and-run.fish",
+            "args": [
+                "${file}",
+            //    "${workspaceFolder}/${fileBasenameNoExtension}"
+               "/tmp/${fileBasenameNoExtension}"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "build and debug active file",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/build-and-debug.fish",
+            "args": [
+                "${file}",
+            //    "${workspaceFolder}/bin/${fileBasenameNoExtension}-debug"
+               "/tmp/${fileBasenameNoExtension}-debug"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}
