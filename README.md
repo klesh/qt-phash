@@ -2,6 +2,8 @@
 
 pHash implementation on Qt with no other dependency.
 
+original implementation : http://www.phash.org/
+
 # Usage
 Include `QtPhash.h` and you are golden.
 ```
@@ -21,6 +23,7 @@ int main() {
 
 # Test Results
 `img_test.cpp` contains all testing logic, check it out if you want to test for yourself.
+Image Sets can be download from http://www.phash.org/download/
 
 `misc` vs `rotd`
 ```
