@@ -90,7 +90,7 @@ void try_qimgPhash() {
   QDir folder1 = imageSetsFolder.filePath(folderName1), folder2 = imageSetsFolder.filePath(folderName2);
 
   QStringList names;
-  QList<ulong> hashes, hashes2;
+  QList<quint64> hashes, hashes2;
 
   QStringList headBuilder;
   headBuilder.append(QString("name").leftJustified(20));
@@ -106,8 +106,8 @@ void try_qimgPhash() {
     // if (name != "Scotland_castle_wedding.bmp") continue;
     QString img1Path = folder1.filePath(name), img2Path = folder2.filePath(name);
     QImage img1(img1Path), img2(img2Path);
-    const long hash1 = QtPhash::computePhash(img1), hash2 = QtPhash::computePhash(img2);
-    const long hash3 = ph_dct_imagehash(img1Path.toLatin1().constData()), hash4 = ph_dct_imagehash(img2Path.toLatin1().constData());
+    const quint64 hash1 = QtPhash::computePhash(img1), hash2 = QtPhash::computePhash(img2);
+    const quint64 hash3 = ph_dct_imagehash(img1Path.toLatin1().constData()), hash4 = ph_dct_imagehash(img2Path.toLatin1().constData());
 
     QStringList lineBuilder;
     lineBuilder.append(name.mid(0, 20).leftJustified(20));
@@ -134,7 +134,7 @@ void try_qimgPhash() {
   headBuilder2.append(QString("dist(ph)").rightJustified(12));
   qDebug() << headBuilder2.join(" ");
   QString onesName = names.takeFirst().mid(0, 20).leftJustified(20);
-  ulong onesHash = hashes.takeFirst();
+  quint64 onesHash = hashes.takeFirst();
   while (!names.isEmpty()) {
     QStringList lineBuilder;
     lineBuilder.append(onesName);

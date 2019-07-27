@@ -13,8 +13,8 @@ Include `QtPhash.h` and you are golden.
 int main() {
   QImage image1("/path/to/your/photo.jpg");
   QImage image2("/path/to/your/photo.jpg");
-  ulong hash1 = QtPhash::computePhash(image1);
-  ulong hash2 = QtPhash::computePhash(image2);
+  quint64 hash1 = QtPhash::computePhash(image1);
+  quint64 hash2 = QtPhash::computePhash(image2);
   int distance = QtPhash::computeDistance(hash1, hash2);
   printf("hash1: %x hash2: %x  distance: %d", hash1, hash2, distance);
   return 0;

@@ -145,16 +145,13 @@ namespace QtPhash {
     const int S = N * M, m = S >> 1, n = m - 1, e = S - 1;
     T array[S];
     matrix.copyDataTo(array);
-    // std::sort(array, array + S);
-    // return (array[m] + array[n])/2;
-    // use middle-of-three for m, because we are looking for the middle element
     const T mv = kthSmallest(array, m, 0, e);
     if (S % 2) return mv;
     const T nv = kthSmallest(array, n, 0, n);
     return (mv + nv) / 2;
   }
 
-  ulong computePhash(const QImage &image) {
+  quint64 computePhash(const QImage &image) {
     const int N = 32, M = 8;
     // step 1. convert to grayscale
     QImage img = image.convertToFormat(QImage::Format_Grayscale8);
@@ -183,12 +180,12 @@ namespace QtPhash {
     return hash;
   }
 
-  int computeDistance(const ulong hash1,const ulong hash2){
-    ulong x = hash1^hash2;
-    const ulong m1  = 0x5555555555555555ULL;
-    const ulong m2  = 0x3333333333333333ULL;
-    const ulong h01 = 0x0101010101010101ULL;
-    const ulong m4  = 0x0f0f0f0f0f0f0f0fULL;
+  int computeDistance(const quint64 hash1,const quint64 hash2){
+    quint64 x = hash1^hash2;
+    const quint64 m1  = 0x5555555555555555ULL;
+    const quint64 m2  = 0x3333333333333333ULL;
+    const quint64 h01 = 0x0101010101010101ULL;
+    const quint64 m4  = 0x0f0f0f0f0f0f0f0fULL;
     x -= (x >> 1) & m1;
     x = (x & m2) + ((x >> 2) & m2);
     x = (x + (x >> 4)) & m4;

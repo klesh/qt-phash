@@ -44,7 +44,7 @@ CImg<float>* ph_dct_matrix(const int N){
   return ptr_matrix;
 }
 
-ulong ph_dct_imagehash(const char* file){
+quint64 ph_dct_imagehash(const char* file){
   if (!file){
     return -1;
   }
@@ -81,8 +81,8 @@ ulong ph_dct_imagehash(const char* file){
   CImg<float> subsec = ss.unroll('x');;
 
   float median = subsec.median();
-  ulong one = 0x0000000000000001;
-  ulong hash = 0x0000000000000000;
+  quint64 one = 0x0000000000000001;
+  quint64 hash = 0x0000000000000000;
   for (int i=0;i< 64;i++){
     float current = subsec(i);
     if (current > median)
