@@ -167,8 +167,8 @@ namespace QtPhash {
     // step 6. fetch lower frequencies and compose the hash
     auto lowerFreqs = matrixSubset<N, M, float>(freqTable, 1, 1);
     auto median = matrixMedian(lowerFreqs);
-    long hash = 0;
-    long flag = 1;
+    qint64 hash = 0;
+    qint64 flag = 1;
 
     for (int row = 0; row < M; row++) {
       for (int col = 0; col < M; col++) {
