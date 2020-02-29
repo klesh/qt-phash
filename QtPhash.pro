@@ -19,11 +19,13 @@ win32::LIBS += \
         -lgdi32
 
 SOURCES += \
-        img_test.cpp
+#        img_test.cpp \
+        QtPhash.cpp
 
 HEADERS += \
-        QtPhash.h\
-        img.h
+#        img.h \
+        QtPhash.h \
+        QtPhash2.h
 
 win32::INCLUDEPATH += \
         D:/Projects/CImg-2.6.7

@@ -7,8 +7,38 @@
 #include <QtDebug>
 #include <utility>
 #include <math.h>
+#define KS 7
 
 namespace QtPhash {
+  enum BlurMethod {
+      None = 0,
+      Box = 1,
+      Gaussian = 2,
+  };
+
+  enum SplitMethod {
+      Median = 0,
+      Mean = 1,
+  };
+
+  const static float boxKernel[KS][KS] = { // box blur kernel
+      {1, 1, 1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1, 1, 1},
+      {1, 1, 1, 1, 1, 1, 1},
+  };
+  const static float gaussianKernel[KS][KS] = { // box blur kernel
+      {0, 0, 1, 2, 1, 0, 0},
+      {0, 3, 13, 22, 13, 3, 0},
+      {1, 13, 59, 97, 59, 13, 1},
+      {2, 22, 97, 159, 97, 22, 2},
+      {1, 13, 59, 97, 59, 13, 1},
+      {0, 3, 13, 22, 13, 3, 0},
+      {0, 0, 1, 2, 1, 0, 0},
+  };
 
   template<int N, int M, typename T>
   void printMatrix(const QGenericMatrix<N, M, T> &matrix) {
@@ -44,21 +74,12 @@ namespace QtPhash {
     return qimg;
   }
 
-  QImage blur(const QImage &source) {
+  QImage convolve(const QImage &source, const float (&kernel)[KS][KS]) {
     assert(source.format() == QImage::Format_Grayscale8);
 
-    const uint KS = 7, w = source.width(), h = source.height();
-    QImage target(w, h, source.format());  
+    const int w = source.width(), h = source.height();
+    QImage target(w, h, source.format());
 
-    const float kernel[KS][KS] = { // box blur kernel
-      {1, 1, 1, 1, 1, 1, 1},
-      {1, 1, 1, 1, 1, 1, 1},
-      {1, 1, 1, 1, 1, 1, 1},
-      {1, 1, 1, 1, 1, 1, 1},
-      {1, 1, 1, 1, 1, 1, 1},
-      {1, 1, 1, 1, 1, 1, 1},
-      {1, 1, 1, 1, 1, 1, 1},
-    };
     const int kcx = KS/2, kcy = kcx; // center position of the kernel
 
     #pragma omp parallel for
@@ -76,7 +97,8 @@ namespace QtPhash {
         float totalValue = 0.0, totalWeight = 0.0;
         for (int ky = ksy; ky < key; ky++) {
           for (int kx = ksx; kx < kex; kx++) {
-            float weight = kernel[kx - ksx][ky - ksy];
+            int i = kx - ksx, j = ky - ksy;
+            float weight = kernel[i][j];
             totalWeight += weight;
             float value = source.scanLine(ky)[kx];
             totalValue += weight * value;
@@ -151,14 +173,29 @@ namespace QtPhash {
     return (mv + nv) / 2;
   }
 
-  quint64 computePhash(const QImage &image) {
+  template<int N, int M, typename T>
+  T matrixMean(QGenericMatrix<N, M, T> matrix) {
+    T total = 0;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; j++) {
+            total += matrix(i, j);
+        }
+    }
+    return total / (M * N);
+  }
+
+  quint64 computePhash(const QImage &image, const BlurMethod blurMethod = Box, const SplitMethod splitMethod = Median) {
     const int N = 32, M = 8;
     // step 1. convert to grayscale
     QImage img = image.convertToFormat(QImage::Format_Grayscale8);
-    // step 2. apply box blur
-    img = blur(img);
-    // step 3. resize to 32x32
+    // step 2. resize to 32x32
     img = img.scaled(N, N, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_Grayscale8);
+    // step 3. apply box blur
+    if (blurMethod == Box) {
+        img = convolve(img, boxKernel);
+    } else if (blurMethod == Gaussian) {
+        img = convolve(img, gaussianKernel);
+    }
     // step 4. convert image to matrix
     auto imgMat = qimg2matrix<N, N, float>(img);
     // step 5. apply dct
@@ -166,13 +203,13 @@ namespace QtPhash {
     auto freqTable = dctMat * imgMat * dctMat.transposed();
     // step 6. fetch lower frequencies and compose the hash
     auto lowerFreqs = matrixSubset<N, M, float>(freqTable, 1, 1);
-    auto median = matrixMedian(lowerFreqs);
+    auto m = splitMethod == Median ? matrixMedian(lowerFreqs) : matrixMean(lowerFreqs);
     qint64 hash = 0;
     qint64 flag = 1;
 
     for (int row = 0; row < M; row++) {
       for (int col = 0; col < M; col++) {
-        if (lowerFreqs(row, col) > median) hash |= flag;
+        if (lowerFreqs(row, col) > m) hash |= flag;
         flag = flag << 1;
       }
     }
